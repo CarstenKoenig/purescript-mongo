@@ -3,7 +3,7 @@
 exports._connect = function _connect(uri, canceler, callback, left, right) {
   var client = require('mongodb').MongoClient;
   client.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true }, function(err, x) {
-    
+
     if (err) {
       return callback(left(err))();
     }
@@ -48,6 +48,13 @@ exports._collection = function _collection(name, db, canceler, callback, left, r
   return canceler(db);
 };
 
+exports._getCollectionNames = function _getCollectionNames(db, canceler, callback, left, right) {
+  db.listCollections().toArray(function(err, colInfos) {
+    (err ? callback(left(err)) : callback(right(colInfos.map(i => i.name))))();
+  });
+  return canceler(db);
+};
+
 exports._collect = function _collect(cursor, canceler, callback, left, right) {
   cursor.toArray(function(err, x) {
     (err ? callback(left(err)) : callback(right(x)))();
@@ -86,8 +93,8 @@ exports._find = function _find(selector, fields, collection, canceler, callback,
 
 exports._insertOne = function _insertOne(json, options, collection, canceler, callback, left, right) {
   collection.insertOne(json, options, function(err, x) {
-    (err ? 
-      callback(left(err)) : 
+    (err ?
+      callback(left(err)) :
       callback(right({ success: x.result.ok === 1, insertedId: x.insertedId } ))
     )();
   });
@@ -96,8 +103,8 @@ exports._insertOne = function _insertOne(json, options, collection, canceler, ca
 
 exports._insertMany = function _insertMany(json, options, collection, canceler, callback, left, right) {
   collection.insertMany(json, options, function(err, x) {
-    (err ? 
-      callback(left(err)) : 
+    (err ?
+      callback(left(err)) :
       callback(right({ success: x.result.ok === 1, insertedCount: x.insertedCount } ))
     )();
   });
@@ -106,8 +113,8 @@ exports._insertMany = function _insertMany(json, options, collection, canceler, 
 
 exports._updateOne = function(selector, json, options, collection, canceler, callback, left, right) {
   collection.updateOne(selector, { $set: json }, options, function(err, x) {
-    (err ? 
-      callback(left(err)) : 
+    (err ?
+      callback(left(err)) :
       callback(right({ success: x.result.ok === 1 } ))
     )();
   });
@@ -117,8 +124,8 @@ exports._updateOne = function(selector, json, options, collection, canceler, cal
 
 exports._updateMany = function(selector, json, options, collection, canceler, callback, left, right) {
   collection.updateMany(selector, { $set: json }, options, function(err, x) {
-    (err ? 
-      callback(left(err)) : 
+    (err ?
+      callback(left(err)) :
       callback(right({ success: x.result.ok === 1 } ))
     )();
   });

@@ -8,6 +8,7 @@ module Database.Mongo
   , db
   , close
   , collection
+  , collections
   , insertOne
   , updateOne
   , find
@@ -69,6 +70,11 @@ close cli = liftAff $ makeAff \cb ->
 collection :: ∀ a m. MonadAff m => String -> Database -> m (Collection a)
 collection name d = liftAff $ makeAff \cb ->
   runFn6 _collection name d noopCancel cb Left Right 
+
+-- | Fetches all collection names
+collections :: ∀ m. MonadAff m => Database -> m (Array String)
+collections d = liftAff $ makeAff \cb ->
+  runFn5 _getCollectionNames d noopCancel cb Left Right 
 
 -- | Fetches the an array of documents that match the query
 find :: ∀ a m. MonadAff m => ReadForeign a => Query a -> FindOptions -> Collection a -> m (Array a)
@@ -209,6 +215,14 @@ foreign import _collection :: ∀ a.
       (Either Error (Collection a) -> Effect Unit)
       (Error -> Either Error (Collection a))
       (Collection a -> Either Error (Collection a))
+      (Effect Canceler)
+
+foreign import _getCollectionNames ::
+  Fn5 Database
+      (Database -> Canceler)
+      (Either Error (Array String) -> Effect Unit)
+      (Error -> Either Error (Array String))
+      (Array String -> Either Error (Array String))
       (Effect Canceler)
 
 foreign import _collect ::
