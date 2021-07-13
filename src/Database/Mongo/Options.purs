@@ -34,7 +34,7 @@ setInsertJournaled j (InsertOptions io) = InsertOptions (io { journaled = j })
 
 instance encodeJsonInsertOptions :: WriteForeign InsertOptions where
   writeImpl (InsertOptions {writeConcern, journaled}) =
-    write { w: writeConcern, j: journaled }
+    write { writeConcern: { w: writeConcern, j: journaled } }
 
 -- | Typed options for updating documents into a collection
 newtype UpdateOptions = UpdateOptions
@@ -61,4 +61,4 @@ setUpdateUpsert u (UpdateOptions uo) = UpdateOptions (uo { upsert = u })
 
 instance encodeJsonUpdateOptions :: WriteForeign UpdateOptions where
   writeImpl (UpdateOptions o) =
-    write { w: o.writeConcern, j: o.journaled, upsert: o.upsert }
+    write { writeConcern: { w: o.writeConcern, j: o.journaled, upsert: o.upsert } }
